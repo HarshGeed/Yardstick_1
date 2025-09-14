@@ -24,10 +24,10 @@ export async function POST(request: NextRequest) {
     }
 
     const token = generateToken({
-      userId: auth.user._id.toString(),
+      userId: (auth.user._id as any).toString(),
       email: auth.user.email,
       role: auth.user.role,
-      tenantId: auth.user.tenantId.toString(),
+      tenantId: (auth.user.tenantId as any).toString(),
     });
 
     return NextResponse.json({
