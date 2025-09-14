@@ -1,202 +1,36 @@
-# Multi-Tenant SaaS Notes Application
-
-A full-stack multi-tenant SaaS Notes Application built with Next.js, MongoDB, and deployed on Vercel. This application supports multiple tenants (companies) with strict data isolation, role-based access control, and subscription-based feature gating.
-
-## Features
-
-- **Multi-Tenancy**: Support for multiple tenants (Acme and Globex) with strict data isolation
-- **Authentication**: JWT-based authentication system
-- **Role-Based Access Control**: Admin and Member roles with different permissions
-- **Subscription Management**: Free (3 notes limit) and Pro (unlimited) plans
-- **Notes CRUD**: Full create, read, update, delete operations for notes
-- **CORS Enabled**: API accessible from external applications
-- **Vercel Deployment**: Ready for production deployment
-
-## Multi-Tenancy Approach
-
-This application uses a **shared schema with tenant ID columns** approach:
-
-- All collections (Tenant, User, Note) share the same MongoDB database
-- Tenant isolation is enforced through `tenantId` fields in User and Note collections
-- All API endpoints validate tenant membership before allowing access
-- This approach provides good performance while maintaining strict data isolation
-
-## Architecture
-
-```
-├── app/
-│   ├── api/                 # API routes
-│   │   ├── auth/login/      # Authentication endpoint
-│   │   ├── health/          # Health check endpoint
-│   │   ├── notes/           # Notes CRUD endpoints
-│   │   └── tenants/         # Tenant management endpoints
-│   ├── dashboard/           # Dashboard page
-│   └── page.tsx             # Login page
-├── components/              # React components
-│   ├── LoginForm.tsx        # Login form component
-│   └── Dashboard.tsx        # Main dashboard component
-├── lib/                     # Utility libraries
-│   ├── auth.ts              # JWT authentication utilities
-│   ├── cors.ts              # CORS configuration
-│   ├── middleware.ts        # Authentication middleware
-│   └── mongodb.ts           # MongoDB connection
-├── models/                  # Mongoose models
-│   ├── Tenant.ts            # Tenant model
-│   ├── User.ts              # User model
-│   └── Note.ts              # Note model
-└── scripts/
-    └── seed.ts              # Database seeding script
-```
-
-## API Endpoints
-
-### Authentication
-- `POST /api/auth/login` - User login
-
-### Health Check
-- `GET /api/health` - Application health status
-
-### Notes (Protected)
-- `GET /api/notes` - List all notes for current tenant
-- `POST /api/notes` - Create a new note
-- `GET /api/notes/:id` - Get specific note
-- `PUT /api/notes/:id` - Update note
-- `DELETE /api/notes/:id` - Delete note
-
-### Tenant Management (Admin Only)
-- `POST /api/tenants/:slug/upgrade` - Upgrade tenant to Pro plan
-
-## Test Accounts
-
-The following test accounts are pre-configured (password: `password`):
-
-| Email | Role | Tenant |
-|-------|------|--------|
-| admin@acme.test | Admin | Acme |
-| user@acme.test | Member | Acme |
-| admin@globex.test | Admin | Globex |
-| user@globex.test | Member | Globex |
+This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started
 
-### Prerequisites
-- Node.js 18+ 
-- MongoDB database (local or cloud)
-- npm or yarn
+First, run the development server:
 
-### Installation
-
-1. Clone the repository:
-```bash
-git clone <repository-url>
-cd yardstick_1
-```
-
-2. Install dependencies:
-```bash
-npm install
-```
-
-3. Set up environment variables:
-```bash
-cp .env.local.example .env.local
-```
-
-Edit `.env.local` with your MongoDB connection string and JWT secret:
-```env
-MONGODB_URI=mongodb://localhost:27017/notes-saas
-JWT_SECRET=your-super-secret-jwt-key-here
-```
-
-4. Seed the database with test accounts:
-```bash
-npm run seed
-```
-
-5. Start the development server:
 ```bash
 npm run dev
+# or
+yarn dev
+# or
+pnpm dev
+# or
+bun dev
 ```
 
-6. Open [http://localhost:3000](http://localhost:3000) in your browser
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-## Deployment on Vercel
+You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
-### Prerequisites
-- Vercel account
-- MongoDB Atlas account (recommended for production)
+This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
-### Steps
+## Learn More
 
-1. **Set up MongoDB Atlas**:
-   - Create a MongoDB Atlas cluster
-   - Get your connection string
-   - Whitelist Vercel's IP ranges
+To learn more about Next.js, take a look at the following resources:
 
-2. **Deploy to Vercel**:
-   ```bash
-   npm install -g vercel
-   vercel
-   ```
+- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
+- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
 
-3. **Configure Environment Variables**:
-   In your Vercel dashboard, add these environment variables:
-   - `MONGODB_URI`: Your MongoDB Atlas connection string
-   - `JWT_SECRET`: A strong secret key for JWT signing
+You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
-4. **Seed Production Database**:
-   After deployment, run the seed script to create test accounts:
-   ```bash
-   vercel env pull .env.local
-   npm run seed
-   ```
+## Deploy on Vercel
 
-## Subscription Plans
+The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
-### Free Plan
-- Maximum 3 notes per tenant
-- All CRUD operations available
-- Upgrade option visible to admins
-
-### Pro Plan
-- Unlimited notes
-- All CRUD operations available
-- No upgrade restrictions
-
-## Security Features
-
-- **Tenant Isolation**: Strict data separation between tenants
-- **JWT Authentication**: Secure token-based authentication
-- **Role-Based Access**: Admin and Member roles with appropriate permissions
-- **Password Hashing**: bcrypt with salt rounds for secure password storage
-- **CORS Configuration**: Controlled cross-origin access
-
-## Development
-
-### Running Tests
-```bash
-npm run lint
-```
-
-### Database Seeding
-```bash
-npm run seed
-```
-
-### Building for Production
-```bash
-npm run build
-npm start
-```
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Test thoroughly
-5. Submit a pull request
-
-## License
-
-This project is licensed under the MIT License.
+Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
