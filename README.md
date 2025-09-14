@@ -2,6 +2,8 @@
 
 A secure multi-tenant SaaS notes application built with Next.js, MongoDB, and Mongoose. This application allows multiple tenants (companies) to securely manage their users and notes while enforcing role-based access and subscription limits.
 
+**Live link:** [Website](https://yardstick-1.vercel.app)
+
 ## Features
 
 ### Multi-Tenancy
