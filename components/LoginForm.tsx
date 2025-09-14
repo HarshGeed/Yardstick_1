@@ -82,17 +82,6 @@ export default function LoginForm() {
               {loading ? 'Signing in...' : 'Sign in'}
             </button>
           </div>
-
-          <div className="mt-6">
-            <div className="text-sm text-gray-600">
-              <p className="font-medium">Test Accounts:</p>
-              <div className="mt-2 space-y-1 text-xs">
-                <p><strong>Acme:</strong> admin@acme.test / user@acme.test</p>
-                <p><strong>Globex:</strong> admin@globex.test / user@globex.test</p>
-                <p><strong>Password:</strong> password (for all accounts)</p>
-              </div>
-            </div>
-          </div>
         </form>
       </div>
     </div>
