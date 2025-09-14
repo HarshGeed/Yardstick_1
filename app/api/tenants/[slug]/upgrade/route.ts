@@ -26,7 +26,9 @@ async function handler(request: NextRequest, context: any, auth: any) {
     }
 
     // Verify the user belongs to this tenant
-    if (auth.user.tenantId.toString() !== tenant._id.toString()) {
+    // auth.user.tenantId is populated, so we need to get the _id from it
+    const userTenantId = auth.user.tenantId._id ? auth.user.tenantId._id : auth.user.tenantId;
+    if (userTenantId.toString() !== tenant._id.toString()) {
       return NextResponse.json(
         { error: 'Access denied' },
         { status: 403 }

@@ -21,6 +21,9 @@ export default function NotesList() {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [newNote, setNewNote] = useState({ title: '', content: '' });
   const [creating, setCreating] = useState(false);
+  const [editingNote, setEditingNote] = useState<string | null>(null);
+  const [editNote, setEditNote] = useState({ title: '', content: '' });
+  const [updating, setUpdating] = useState(false);
   const { user, token } = useAuth();
 
   useEffect(() => {
@@ -78,6 +81,47 @@ export default function NotesList() {
       setError('Failed to create note');
     } finally {
       setCreating(false);
+    }
+  };
+
+  const startEdit = (note: Note) => {
+    setEditingNote(note._id);
+    setEditNote({ title: note.title, content: note.content });
+  };
+
+  const cancelEdit = () => {
+    setEditingNote(null);
+    setEditNote({ title: '', content: '' });
+  };
+
+  const updateNote = async (noteId: string) => {
+    setUpdating(true);
+    setError('');
+
+    try {
+      const response = await fetch(`/api/notes/${noteId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify(editNote),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setNotes(notes.map(note => note._id === noteId ? data.note : note));
+        setEditingNote(null);
+        setEditNote({ title: '', content: '' });
+      } else {
+        const errorData = await response.json();
+        setError(errorData.error);
+      }
+    } catch (error) {
+      console.error('Error updating note:', error);
+      setError('Failed to update note');
+    } finally {
+      setUpdating(false);
     }
   };
 
@@ -225,29 +269,86 @@ export default function NotesList() {
         ) : (
           notes.map((note) => (
             <div key={note._id} className="bg-white p-6 rounded-lg shadow">
-              <div className="flex justify-between items-start">
-                <div className="flex-1">
-                  <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                    {note.title}
-                  </h3>
-                  <p className="text-gray-600 mb-4 whitespace-pre-wrap">
-                    {note.content}
-                  </p>
-                  <div className="text-sm text-gray-500">
-                    <p>Created by: {note.createdBy.email}</p>
-                    <p>Created: {new Date(note.createdAt).toLocaleString()}</p>
-                    {note.updatedAt !== note.createdAt && (
-                      <p>Updated: {new Date(note.updatedAt).toLocaleString()}</p>
-                    )}
+              {editingNote === note._id ? (
+                // Edit form
+                <form onSubmit={(e) => { e.preventDefault(); updateNote(note._id); }}>
+                  <div className="mb-4">
+                    <label htmlFor={`edit-title-${note._id}`} className="block text-sm font-medium text-gray-700 mb-2">
+                      Title
+                    </label>
+                    <input
+                      type="text"
+                      id={`edit-title-${note._id}`}
+                      value={editNote.title}
+                      onChange={(e) => setEditNote({ ...editNote, title: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                      required
+                    />
+                  </div>
+                  <div className="mb-4">
+                    <label htmlFor={`edit-content-${note._id}`} className="block text-sm font-medium text-gray-700 mb-2">
+                      Content
+                    </label>
+                    <textarea
+                      id={`edit-content-${note._id}`}
+                      value={editNote.content}
+                      onChange={(e) => setEditNote({ ...editNote, content: e.target.value })}
+                      rows={4}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                      required
+                    />
+                  </div>
+                  <div className="flex justify-end space-x-2">
+                    <button
+                      type="button"
+                      onClick={cancelEdit}
+                      className="px-4 py-2 text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={updating}
+                      className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50"
+                    >
+                      {updating ? 'Updating...' : 'Update Note'}
+                    </button>
+                  </div>
+                </form>
+              ) : (
+                // View mode
+                <div className="flex justify-between items-start">
+                  <div className="flex-1">
+                    <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                      {note.title}
+                    </h3>
+                    <p className="text-gray-600 mb-4 whitespace-pre-wrap">
+                      {note.content}
+                    </p>
+                    <div className="text-sm text-gray-500">
+                      <p>Created by: {note.createdBy.email}</p>
+                      <p>Created: {new Date(note.createdAt).toLocaleString()}</p>
+                      {note.updatedAt !== note.createdAt && (
+                        <p>Updated: {new Date(note.updatedAt).toLocaleString()}</p>
+                      )}
+                    </div>
+                  </div>
+                  <div className="ml-4 flex space-x-2">
+                    <button
+                      onClick={() => startEdit(note)}
+                      className="text-blue-600 hover:text-blue-800"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => deleteNote(note._id)}
+                      className="text-red-600 hover:text-red-800"
+                    >
+                      Delete
+                    </button>
                   </div>
                 </div>
-                <button
-                  onClick={() => deleteNote(note._id)}
-                  className="ml-4 text-red-600 hover:text-red-800"
-                >
-                  Delete
-                </button>
-              </div>
+              )}
             </div>
           ))
         )}
